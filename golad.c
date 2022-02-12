@@ -273,8 +273,8 @@ int main() {
 
 
     //make fullscreen (for screensaver)
-    char command[100];
-    strcpy(command, "osascript /Users/codyryall/Desktop/Screensaver/command.txt");
+    //char command[100];
+    //strcpy(command, "osascript ~/Desktop/Screensaver/command.txt");
     //system(command);
 
     while (1) {                                //update current board, actually do the sim
