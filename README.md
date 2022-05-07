@@ -13,12 +13,12 @@ This repo contains the source of a screensaver I have on my laptop; just the exe
     cd /path/to/gol-screensaver/
     ```
 
-3. Run the make command to execute the makefile.
+3. Run the make command to execute the makefile and compile everything.
     ```bash
     make
     ```
 
-The compiled binary should be in the `/bin` directory as "screensaver", though after running `make` the executable should run automatically.
+The compiled binary should be in the `/bin` directory as "screensaver".
 
 ---
 
