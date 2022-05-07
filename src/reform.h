@@ -5,6 +5,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "constants.h"
+
 #define RNDLIFE (150+rand()%250)
 
 float standard_deviation(int length, int array[]) {
@@ -61,8 +63,6 @@ void fill(int width, int height, int board[][height], int lifetype) {
     }
 }
 
-extern const int HISTORY_LENGTH;
-
 int reasign_lifetype(int width, int height, int * history_offset, int sum_history[], int lifetype_history[], int board_history[][width][height]) {
     srand(time(NULL));
     //if less than 8% of the board is filled
@@ -93,7 +93,7 @@ int evaluate_history(int width, int height, int * limited_life_timer, int * hist
     
     // could probably compress this a bit more; some lines are duplicates
     // but eh it works as is, not a big deal currently
-    if (sum_history[*history_offset]+sum_history[(*history_offset+3)%HISTORY_LENGTH] == 0) {
+    if (sum_history[*history_offset] == 0) {
         *limited_life_timer = RNDLIFE;
         reasign_lifetype(width, height, history_offset, sum_history, lifetype_history, board_history);
         fill(width, height, board_history[*history_offset], lifetype_history[*history_offset]);

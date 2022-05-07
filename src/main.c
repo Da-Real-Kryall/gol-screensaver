@@ -8,8 +8,9 @@
 #include "iterate.h" //functions related to iterating the board
 #include "display.h" //functions for printing to output
 #include "reform.h" //functions for reversing entropy
+#include "constants.h" //constants like history length
 
-const int HISTORY_LENGTH = 20; //probably breaks if its less than 5
+
 const int MS_DELAY = 70000;//73000;
 
 int main() {

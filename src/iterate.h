@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "constants.h"
+
 int life_ref[12][7][9] = { // new state for a cell depending on various factors
     { //game of life
         {0, 0, 0, 1, 0, 0, 0, 0, 0},
@@ -124,8 +126,6 @@ int deltas[8][2] = {
     {1, 0},
     {1, 1}
 };
-
-extern const int HISTORY_LENGTH;
 
 //final arg deternines wether delayed cell death (1 to 6, 5, 4, 3, etc) is forced or determined by tables
 int update_board(int width, int height, int * history_offset, int lifetype_history[], int sum_history[], int board_history[][width][height], int force_delay) {
