@@ -1,3 +1,5 @@
 all:
-	gcc -Ofast -o Golad.out golad.c
+	cd ./bin; \
+	gcc -Ofast -o screensaver ../src/main.c; \
+	./screensaver;
 .PHONY: all
