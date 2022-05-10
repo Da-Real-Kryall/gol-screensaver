@@ -11,11 +11,13 @@
 #include "constants.h" //constants like history length
 
 
-const int MS_DELAY = 70000;//73000;
+const int MS_DELAY = 60000;//73000;
 
 int main() {
 
     srand(time(NULL));
+    //sleep for a bit to let fullscreen work; 4 secs
+    sleep(2);
 
     struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);

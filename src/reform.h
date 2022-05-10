@@ -7,8 +7,6 @@
 
 #include "constants.h"
 
-#define RNDLIFE (150+rand()%250)
-
 float standard_deviation(int length, int array[]) {
     float mean = 0;
     for (int i = 0; i < length; i++) {
@@ -26,7 +24,7 @@ float standard_deviation(int length, int array[]) {
 
 
 int larger_types[] = { //maze, like star wars, coagulations, living on the edge?
-    1, 1, 3, 3, 5, 5, 9, 2
+    1, 3, 5, 9, 2
 };
 int smaller_types[] = { //
     0, 1, 4, 6, 7, 8, 9, 10, 11
@@ -72,14 +70,14 @@ int reasign_lifetype(int width, int height, int * history_offset, int sum_histor
     }
     sum_mean /= HISTORY_LENGTH*width*height/100;
 
-    if (sum_mean < 5) { 
+    if (sum_mean < 8) { 
         lifetype_history[*history_offset] = rand() % sizeof(larger_types)/sizeof(int);
     } else if (sum_mean > 60) {
         lifetype_history[*history_offset] = rand() % sizeof(smaller_types)/sizeof(int);
     } else {
         int new_lifetype = rand() % 11;
 
-        lifetype_history[*history_offset] = new_lifetype + (new_lifetype >= lifetype_history[*history_offset]);
+        lifetype_history[*history_offset] = new_lifetype + new_lifetype > (lifetype_history[*history_offset] - 1);
     }
     for (int i = 0; i < sizeof(large_enders)/sizeof(int); i++) {
         if (lifetype_history[(*history_offset+1)%HISTORY_LENGTH] == large_enders[i]) {
