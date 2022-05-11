@@ -76,8 +76,8 @@ int reasign_lifetype(int width, int height, int * history_offset, int sum_histor
         lifetype_history[*history_offset] = rand() % sizeof(smaller_types)/sizeof(int);
     } else {
         int new_lifetype = rand() % 11;
-
-        lifetype_history[*history_offset] = new_lifetype + new_lifetype > (lifetype_history[*history_offset] - 1);
+        int old_lifetype = lifetype_history[*history_offset];
+        lifetype_history[*history_offset] = new_lifetype + (new_lifetype >= old_lifetype);
     }
     for (int i = 0; i < sizeof(large_enders)/sizeof(int); i++) {
         if (lifetype_history[(*history_offset+1)%HISTORY_LENGTH] == large_enders[i]) {

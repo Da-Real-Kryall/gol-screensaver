@@ -48,6 +48,14 @@ int main() {
     //fill(width, height, board_history[history_offset], lifetype_history[history_offset]);
     while (1) {
         return_board(width, height, board_history[history_offset], typeref, -1);
+        
+        //some debug code
+        //for (int i = 0; i < HISTORY_LENGTH; i ++) {
+        //    printf("%i, ", lifetype_history[i]);
+        //}
+        //printf("%i \n", limited_life_timer);
+        //fflush(stdout);
+        
         limited_life_timer--;
         if (update_board(width, height, &history_offset, lifetype_history, sum_history, board_history, 
             evaluate_history(width, height, &limited_life_timer, &history_offset, sum_history, lifetype_history, board_history)
