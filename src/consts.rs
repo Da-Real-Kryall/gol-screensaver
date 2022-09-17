@@ -25,9 +25,9 @@ pub(crate) const LIFE_REF: [[[usize; 9]; 6]; 12] = [ // new state for a cell dep
         //[4, 4, 4, 4, 4, 4, 4, 4, 4],
         [0, 0, 0, 0, 0, 0, 0, 0, 0]
     ],
-    [ //coagulations
+    [ //coagulations (changed a little)
         [0, 0, 0, 1, 0, 0, 0, 1, 1],
-        [0, 0, 1, 1, 0, 1, 1, 1, 1],
+        [0, 2, 1, 1, 0, 1, 1, 1, 1],
         [3, 3, 3, 3, 3, 3, 3, 3, 3], // done
         [4, 4, 4, 4, 4, 4, 4, 4, 4],
         [5, 5, 5, 5, 5, 5, 5, 5, 5],
@@ -51,7 +51,7 @@ pub(crate) const LIFE_REF: [[[usize; 9]; 6]; 12] = [ // new state for a cell dep
     ],
     [ //2x2
         [0, 0, 0, 1, 0, 0, 1, 0, 0],
-        [0, 1, 1, 0, 0, 1, 0, 0, 0],
+        [4, 1, 1, 4, 4, 1, 4, 4, 4],
         [3, 3, 3, 3, 3, 3, 3, 3, 3], // done
         [4, 4, 4, 4, 4, 4, 4, 4, 4],
         [5, 5, 5, 5, 5, 5, 5, 5, 5],
@@ -119,10 +119,10 @@ pub(crate) const COLOUR_REF: [[usize; 6]; LIFE_REF.len()] = [
     [0, 17, 18, 19, 20, 21], // like star wars
     [0, 27, 56, 19, 18, 17], // walled cities
     [0, 190, 148, 106, 64, 22], // coagulations
-    [17, 51, 45, 39, 33, 20], // day night
+    [0, 51, 45, 39, 33, 20], // day night (might make the 0 a 17 again)
     [0, 156, 114, 72, 29, 23], // maze
-    [0, 226, 184, 142, 100, 58], // 2x2
-    [0, 41, 172, 82, 47, 220], // amoeba with diff die time
+    [0, 220, 178, 142, 100, 58], // 2x2
+    [0, 84, 172, 82, 30, 18], // amoeba with diff die time
     [0, 28, 40, 82, 118, 154], // frogs
     [0, 160, 196, 166, 202, 220], // living on the edge
     [0, 196, 160, 124, 88, 52], // high life

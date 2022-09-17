@@ -38,6 +38,13 @@ fn main() {
         s.1 *= 2;
         s
     };
+    for _ in 0..size.0 {
+        print!("\n");
+    }
+    //hide cursor
+    print!("{}", termion::cursor::Hide);
+    //hide mouse cursor
+
     let mut state_history: VecDeque<Vec<Vec<usize>>> = VecDeque::from(vec![vec![vec![0; size.0 as usize]; size.1 as usize]; HISTORY_LENGTH]);
     let mut type_history: VecDeque<usize> = VecDeque::from(vec![0; HISTORY_LENGTH]);
     let mut limited_life_timer: usize = 0;
@@ -116,8 +123,8 @@ fn main() {
 
         //print the board
         
-        print_board(&state_history[0], colour_palette);
         let duration = current.elapsed();
+        print_board(&state_history[0], colour_palette);
 
         thread::sleep(Duration::from_millis(DELAY_MS-(duration.as_millis() as u64).min(DELAY_MS)));
     }
