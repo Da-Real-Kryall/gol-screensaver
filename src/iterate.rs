@@ -61,7 +61,7 @@ pub(crate) fn update_board(old_board: &Vec<Vec<usize>>, new_type: &usize) -> Vec
             let mut neighbors = 0;
             for i in -1..2 {
                 for j in -1..2 {
-                    if old_board[(y as i32 + i) as usize % old_board.len()][(x as i32 + j) as usize % old_board[y].len()] == 1 {
+                    if old_board[(y as i32 + i + old_board.len() as i32) as usize % old_board.len()][(x as i32 + j + old_board[0].len() as i32) as usize % old_board[0].len()] == 1 {
                         neighbors += 1;
                     }
                 }
