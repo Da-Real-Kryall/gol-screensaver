@@ -54,7 +54,8 @@ pub(crate) fn refill_board(new_board: &Vec<Vec<usize>>, new_type: &usize) -> Vec
     new_board
 }
 //when x and y are out of bounds they loop back
-pub(crate) fn update_board(old_board: &Vec<Vec<usize>>, new_type: &usize) -> Vec<Vec<usize>> {
+pub(crate) fn update_board(old_board: &Vec<Vec<usize>>, new_type: &usize, soften: &bool) -> Vec<Vec<usize>> {
+    //let mut sum: usize = 0;
     let mut new_board = old_board.clone();
     for y in 0..old_board.len() {
         for x in 0..old_board[y].len() {
@@ -69,8 +70,17 @@ pub(crate) fn update_board(old_board: &Vec<Vec<usize>>, new_type: &usize) -> Vec
             if old_board[y][x] == 1 {
                 neighbors -= 1;
             }
+            //if new type is in [3, 4, 5]
             new_board[y][x] = LIFE_REF[*new_type][old_board[y][x]][neighbors];
+            //sum += (new_board[y][x] == 0) as usize;
+            if *soften && old_board[y][x] != 0 && new_board[y][x] == 0 {
+                new_board[y][x] = 2;
+            }
         }
     }
+    //if *new_type - 3 < 3 && sum > old_board.len() * old_board[0].len() / 3 {
+//
+    //}
+
     new_board
 }

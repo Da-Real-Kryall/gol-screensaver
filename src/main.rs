@@ -14,7 +14,7 @@ after these changes happen, the board will still be evaluated and updated.
 use std::collections::VecDeque;
 use rand::Rng;
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration,Instant};
 
 pub(crate) mod consts;
 pub(crate) mod display;
@@ -41,10 +41,12 @@ fn main() {
     let mut state_history: VecDeque<Vec<Vec<usize>>> = VecDeque::from(vec![vec![vec![0; size.0 as usize]; size.1 as usize]; HISTORY_LENGTH]);
     let mut type_history: VecDeque<usize> = VecDeque::from(vec![0; HISTORY_LENGTH]);
     let mut limited_life_timer: usize = 0;
-    let mut colour_palette: [usize; 6] = COLOUR_REF[0];
+    let mut colour_palette: [usize; 6] = [0; 6];
 
     loop {
-        thread::sleep(Duration::from_millis(DELAY_MS));
+        let current = Instant::now();
+
+        
         //let new_board = board_history[0].clone();
         //check if board should be changed, and how it should be changed
         let mut new_board = state_history[0].clone();
@@ -65,12 +67,13 @@ fn main() {
 
                 //board is empty, refill after doing all the other stuff first
                 new_board = refill_board(&new_board, &type_history[0].clone()); //see if i can remove this clone later
+                colour_palette = [0; 6];
             },
             _ => {
             },
         }
         //update the board
-        new_board = update_board(&new_board, &type_history[0].clone()); //see if i can remove this clone later
+        new_board = update_board(&new_board, &type_history[0].clone(), &(new_type != type_history[0] && new_type - 3 < 3)); //see if i can remove this clone later
         
         //update the history and limited life timer
         state_history.pop_back();
@@ -112,7 +115,11 @@ fn main() {
         }
 
         //print the board
+        
         print_board(&state_history[0], colour_palette);
+        let duration = current.elapsed();
+
+        thread::sleep(Duration::from_millis(DELAY_MS-(duration.as_millis() as u64).min(DELAY_MS)));
     }
 
 }

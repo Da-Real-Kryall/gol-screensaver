@@ -22,7 +22,7 @@ pub(crate) fn print_board(board: &Vec<Vec<usize>>, colours: [usize; 6]) {
             if fg_colour != bg_colour {
                 print_buffer.push_str("▀");
             } else {
-                print_buffer.push_str("█");
+                print_buffer.push_str(" ");
             }
             
 

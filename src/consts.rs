@@ -18,10 +18,11 @@ pub(crate) const LIFE_REF: [[[usize; 9]; 6]; 12] = [ // new state for a cell dep
     ],
     [ //walled cities
         [0, 0, 0, 0, 1, 1, 1, 1, 1],
-        [0, 0, 1, 1, 1, 1, 0, 0, 0],
+        [4, 4, 1, 1, 1, 1, 4, 4, 4],
         [3, 3, 3, 3, 3, 3, 3, 3, 3], // done
-        [4, 4, 4, 4, 4, 4, 4, 4, 4],
         [5, 5, 5, 5, 5, 5, 5, 5, 5],
+        [5, 5, 5, 5, 5, 5, 5, 5, 5],
+        //[4, 4, 4, 4, 4, 4, 4, 4, 4],
         [0, 0, 0, 0, 0, 0, 0, 0, 0]
     ],
     [ //coagulations
@@ -111,10 +112,10 @@ pub(crate) const INIT_CHANCE_REF: [usize; LIFE_REF.len()] = [
     2,
     2
 ];
-pub(crate) const DELAY_MS: u64 = 60;
+pub(crate) const DELAY_MS: u64 = 80;
 //all zeros
 pub(crate) const COLOUR_REF: [[usize; 6]; LIFE_REF.len()] = [
-    [0, 1, 251, 245, 239, 233], // game of life
+    [0, 15, 251, 245, 239, 233], // game of life
     [0, 17, 18, 19, 20, 21], // like star wars
     [0, 27, 56, 19, 18, 17], // walled cities
     [0, 190, 148, 106, 64, 22], // coagulations
@@ -125,7 +126,7 @@ pub(crate) const COLOUR_REF: [[usize; 6]; LIFE_REF.len()] = [
     [0, 28, 40, 82, 118, 154], // frogs
     [0, 160, 196, 166, 202, 220], // living on the edge
     [0, 196, 160, 124, 88, 52], // high life
-    [0, 225, 183, 139, 103, 60], // move
+    [0, 207, 141, 139, 103, 60], // move
 ];
 pub(crate) const PALETTE: [[u32; 3]; 256] = [
     [0, 0, 0],
