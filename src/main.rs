@@ -32,6 +32,7 @@ use crate::iterate::*;
 */
 
 fn main() {
+    thread::sleep(Duration::from_millis(2000));
     let mut rng = rand::thread_rng();
     let size: (u16, u16) = {
         let mut s = termion::terminal_size().unwrap();
@@ -45,7 +46,6 @@ fn main() {
     print!("{}", termion::cursor::Hide);
 
     //wait 2 seconds
-    thread::sleep(Duration::from_millis(2000));
 
     let mut state_history: VecDeque<Vec<Vec<usize>>> = VecDeque::from(vec![vec![vec![0; size.0 as usize]; size.1 as usize]; HISTORY_LENGTH]);
     let mut type_history: VecDeque<usize> = VecDeque::from(vec![0; HISTORY_LENGTH]);

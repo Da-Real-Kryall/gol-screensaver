@@ -13,7 +13,7 @@ This repo contains the source of a screensaver I have on my laptop; just the exe
     cd /path/to/gol-screensaver/
     ```
 
-3. Run the make command to execute the makefile and compile everything.
+3. Use cargo to compile and execute everything:
     ```bash
     cargo run --release
     ```
@@ -28,3 +28,16 @@ This was first programmed in C as one of my first largeish projects using the la
 I then did another rewrite in Rust for practice with the language, simultaneously trying out a new method of display.
 
 If you are curious as to how I have made this a screensaver on MacOS; I used a piece of software called "Sleepwatcher" to trigger executable files and bash scripts on certain inactivity related events.
+
+---
+
+## Here are some screenshots of it in action:
+![2by2](2by2.png)
+![amoeba](amoeba.png)
+![cities](cities.png)
+![conway](conway.png)
+![daynight](daynight.png)
+![frog](frog.png)
+![highlife](highlife.png)
+![maze](maze.png)
+![starwars](starwars.png)
