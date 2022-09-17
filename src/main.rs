@@ -1,54 +1,84 @@
+/*
+i have a loop that continuously updates the board
+in the board history i keep track of cell states and lifetypes
+
+here are my checks for refilling the board:
+    if the board is empty
+
+then, here are my checks for changing the lifetype:
+    it has been a while since the last change
+    the board is identical to one of the last 16 boards, lifetype doesn't matter when comparing
+
+after these changes happen, the board will still be evaluated and updated.
+*/
+use std::collections::VecDeque;
+use rand::Rng;
 use std::thread;
 use std::time::Duration;
-use rand::Rng;
 
-use termion;
+pub(crate) mod consts;
+pub(crate) mod display;
+pub(crate) mod iterate;
+use crate::consts::*;
+use crate::display::*;
+use crate::iterate::*;
 
-//ill move these to constants.rs later
-const MS_DELAY: u32 = 60000; //73000
-const HISTORY_LENGTH: usize = 20;
+
+/* Functions to make:
+    check_board_history
+    refill_board
+    update_board
+    print_board
+*/
 
 fn main() {
-
-    thread::sleep(Duration::from_secs(2));
-
-    //get random generator
     let mut rng = rand::thread_rng();
-
-    //width is size.0 - 2
-    //height is size.1 - 2
-    let size: (u16, u16) = //{
-        //let (w, h) = 
-        termion::terminal_size().unwrap();
-        //(w - 2, h - 2)
-    //};
-
-    //dont need typeref just yet, i'll start without border
-
-    let mut history_offset: usize = 0;
-
-    let mut lifetype_history: [usize; HISTORY_LENGTH] = [0; HISTORY_LENGTH];
-    let mut sum_history: [u32; HISTORY_LENGTH] = [0; HISTORY_LENGTH];
-    let mut board_history: Vec<Vec<Vec<usize>>> = vec![vec![vec![0; size.0 as usize]; size.1 as usize]; HISTORY_LENGTH];
-
+    let size: (u16, u16) = termion::terminal_size().unwrap();
+    let mut state_history: VecDeque<Vec<Vec<usize>>> = VecDeque::from(vec![vec![vec![0; size.0 as usize]; size.1 as usize]; HISTORY_LENGTH]);
+    let mut type_history: VecDeque<usize> = VecDeque::from(vec![0; HISTORY_LENGTH]);
     let mut limited_life_timer: usize = 0;
 
-    print!("\x1b[?25l"); //hide cursor
-    
+
     loop {
-        return_board(&size, &board_history[history_offset], -1);
-        
-        limited_life_timer -= 1;
-    
-        if update_board(&size, &history_offset, &lifetype_history, &sum_history, &board_history, 
-            evaluate_history(&size, &limited_life_timer, &history_offset, &sum_history, &lifetype_history, &board_history)
-        ) {
-            //if update_board returns 1 the board has been refilled due to it being completely empty
-            for i in 0..5 {
-                thread::sleep(Duration::from_millis(MS_DELAY as u64);
-                return_board(&size, &board_history[history_offset], 6-i);
-            }
+        thread::sleep(Duration::from_millis(DELAY_MS));
+        //let new_board = board_history[0].clone();
+        //check if board should be changed, and how it should be changed
+        let mut new_board = state_history[0].clone();
+        let mut new_type = type_history[0];
+
+        match check_board_history(&state_history, &limited_life_timer) { //&type_history,
+            //0: board is empty, refill it and change lifetype
+            //1: board is identical to one of the last 16 boards, change lifetype
+            //2: board has been the same for a while, change lifetype
+            1 | 2 => {
+                limited_life_timer = 150+rng.gen_range(0, 250); //also reset limited_life_timer
+                
+                new_type = rng.gen_range(0, LIFE_REF.len());
+            },
+            0 => {
+                limited_life_timer = 150+rng.gen_range(0, 250); //also reset limited_life_timer
+                new_type = rng.gen_range(0, LIFE_REF.len());
+
+                //board is empty, refill after doing all the other stuff first
+                new_board = refill_board(&new_board, &type_history[0].clone()); //see if i can remove this clone later
+            },
+            _ => {
+            },
         }
-        thread::sleep(Duration::from_millis(MS_DELAY as u64));
+        //update the board
+        new_board = update_board(&new_board, &type_history[0].clone()); //see if i can remove this clone later
+        
+        //update the history and limited life timer
+        state_history.pop_back();
+        state_history.push_front(new_board);
+
+        type_history.pop_back();
+        type_history.push_front(new_type);
+
+        limited_life_timer -= 1;
+
+        //print the board
+        print_board(&state_history[0]);
     }
+
 }
