@@ -41,9 +41,11 @@ fn main() {
     for _ in 0..size.0 {
         print!("\n");
     }
-    //hide cursor
+
     print!("{}", termion::cursor::Hide);
-    //hide mouse cursor
+
+    //wait 2 seconds
+    thread::sleep(Duration::from_millis(2000));
 
     let mut state_history: VecDeque<Vec<Vec<usize>>> = VecDeque::from(vec![vec![vec![0; size.0 as usize]; size.1 as usize]; HISTORY_LENGTH]);
     let mut type_history: VecDeque<usize> = VecDeque::from(vec![0; HISTORY_LENGTH]);
