@@ -1,14 +1,13 @@
-
-use std::collections::VecDeque;
+use crate::consts::{INIT_CHANCE_REF, LIFE_REF};
 use rand::Rng;
-use crate::consts::{
-    INIT_CHANCE_REF,
-    LIFE_REF,
-};
-
+use std::collections::VecDeque;
 
 //holy frick, copilot wrote all of this
-pub(crate) fn check_board_history(state_history: &VecDeque<Vec<Vec<usize>>>, limited_life_timer: &usize) -> usize {//, type_history: &VecDeque<usize>
+pub(crate) fn check_board_history(
+    state_history: &VecDeque<Vec<Vec<usize>>>,
+    limited_life_timer: &usize,
+) -> usize {
+    //, type_history: &VecDeque<usize>
     //check if board is empty
     let mut empty = true;
     for row in &state_history[0] {
@@ -50,11 +49,15 @@ pub(crate) fn refill_board(new_board: &Vec<Vec<usize>>, new_type: &usize) -> Vec
                 *cell = 0;
             }
         }
-    };
+    }
     new_board
 }
 //when x and y are out of bounds they loop back
-pub(crate) fn update_board(old_board: &Vec<Vec<usize>>, new_type: &usize, soften: &bool) -> Vec<Vec<usize>> {
+pub(crate) fn update_board(
+    old_board: &Vec<Vec<usize>>,
+    new_type: &usize,
+    soften: &bool,
+) -> Vec<Vec<usize>> {
     //let mut sum: usize = 0;
     let mut new_board = old_board.clone();
     for y in 0..old_board.len() {
@@ -62,7 +65,10 @@ pub(crate) fn update_board(old_board: &Vec<Vec<usize>>, new_type: &usize, soften
             let mut neighbors = 0;
             for i in -1..2 {
                 for j in -1..2 {
-                    if old_board[(y as i32 + i + old_board.len() as i32) as usize % old_board.len()][(x as i32 + j + old_board[0].len() as i32) as usize % old_board[0].len()] == 1 {
+                    if old_board[(y as i32 + i + old_board.len() as i32) as usize % old_board.len()]
+                        [(x as i32 + j + old_board[0].len() as i32) as usize % old_board[0].len()]
+                        == 1
+                    {
                         neighbors += 1;
                     }
                 }
@@ -79,7 +85,7 @@ pub(crate) fn update_board(old_board: &Vec<Vec<usize>>, new_type: &usize, soften
         }
     }
     //if *new_type - 3 < 3 && sum > old_board.len() * old_board[0].len() / 3 {
-//
+    //
     //}
 
     new_board
