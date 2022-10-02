@@ -32,26 +32,30 @@ use crate::iterate::*;
 */
 
 fn main() {
-    thread::sleep(Duration::from_millis(2000));
+    //thread::sleep(Duration::from_millis(2000));
     let mut rng = rand::thread_rng();
     let size: (u16, u16) = {
         let mut s = termion::terminal_size().unwrap();
-        s.1 *= 2;
+        s.0 -= 2;
+        s.1 -= 2;
         s
     };
     for _ in 0..size.0 {
         print!("\n");
     }
 
-    print!("{}", termion::cursor::Hide);
+    //print!("{}", termion::cursor::Hide);
+
+    //show cursor (ansi sequence)
+    //print!("\x1b[?25h");
 
     //wait 2 seconds
 
     let mut state_history: VecDeque<Vec<Vec<usize>>> = VecDeque::from(vec![vec![vec![0; size.0 as usize]; size.1 as usize]; HISTORY_LENGTH]);
     let mut type_history: VecDeque<usize> = VecDeque::from(vec![0; HISTORY_LENGTH]);
     let mut limited_life_timer: usize = 0;
-    let mut colour_palette: [usize; 6] = [0; 6];
-
+    let mut colour_palette: [usize; 5] = [0; 5];
+    let mut old_colour_palette: [usize; 5] = [0; 5];
     loop {
         let current = Instant::now();
 
@@ -76,7 +80,7 @@ fn main() {
 
                 //board is empty, refill after doing all the other stuff first
                 new_board = refill_board(&new_board, &type_history[0].clone()); //see if i can remove this clone later
-                colour_palette = [0; 6];
+                colour_palette = [0; 5];
             },
             _ => {
             },
@@ -94,6 +98,7 @@ fn main() {
         limited_life_timer -= 1;
 
         if colour_palette != COLOUR_REF[type_history[0]] {
+            //old_colour_palette = colour_palette.clone();
             //make colour palette closer to the current lifetype's palette
             for i in 0..colour_palette.len() {
                 let mut colour: [u32; 3] = PALETTE[colour_palette[i]];
@@ -119,6 +124,7 @@ fn main() {
                         closest_dist = dist;
                     }
                 }
+                old_colour_palette[i] = colour_palette[i].clone();
                 colour_palette[i] = closest;//PALETTE.iter().position(|&x| x == colour).unwrap();
             }
         }
@@ -126,7 +132,7 @@ fn main() {
         //print the board
         
         let duration = current.elapsed();
-        print_board(&state_history[0], colour_palette);
+        print_board(&state_history[0], &state_history[1], colour_palette, old_colour_palette, CHAR_PALETTE[type_history[0]], CHAR_PALETTE[type_history[1]]);
 
         thread::sleep(Duration::from_millis(DELAY_MS-(duration.as_millis() as u64).min(DELAY_MS)));
     }
