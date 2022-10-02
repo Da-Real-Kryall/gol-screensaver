@@ -33,6 +33,7 @@ If you are curious as to how I have made this a screensaver on MacOS; I used a p
 
 ## Here are some screenshots of it in action:
 ![2by2](2by2.png)
+![coagulations](coagulations.png)
 ![amoeba](amoeba.png)
 ![cities](cities.png)
 ![conway](conway.png)
