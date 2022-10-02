@@ -39,6 +39,6 @@ If you are curious as to how I have made this a screensaver on MacOS; I used a p
 ![conway](conway.png)
 ![daynight](daynight.png)
 ![frog](frog.png)
-![highlife](highlife.png)
+![lote](lote.png)
 ![maze](maze.png)
 ![starwars](starwars.png)

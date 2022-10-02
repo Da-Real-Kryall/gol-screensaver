@@ -24,8 +24,8 @@ pub(crate) fn print_board(
                 || _y.abs_diff(board.len() + 1) % (board.len() + 1) < 1)
                 && state != 0
             {
-                state = state.min(2) + 3;
-                old_state = old_state.min(2) + 3;
+                state = state.min(1) + 4;
+                old_state = old_state.min(1) + 4;
             }
             if old_state != state
                 || {
