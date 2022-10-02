@@ -14,7 +14,7 @@ after these changes happen, the board will still be evaluated and updated.
 use std::collections::VecDeque;
 use rand::Rng;
 use std::thread;
-use std::time::{Duration,Instant};
+use std::time::{Duration};//,Instant};
 
 pub(crate) mod consts;
 pub(crate) mod display;
@@ -57,7 +57,7 @@ fn main() {
     let mut colour_palette: [usize; 5] = [0; 5];
     let mut old_colour_palette: [usize; 5] = [0; 5];
     loop {
-        let current = Instant::now();
+        //let current = Instant::now();
 
         
         //let new_board = board_history[0].clone();
@@ -131,10 +131,10 @@ fn main() {
 
         //print the board
         
-        let duration = current.elapsed();
+        //let duration = current.elapsed();
         print_board(&state_history[0], &state_history[1], colour_palette, old_colour_palette, CHAR_PALETTE[type_history[0]], CHAR_PALETTE[type_history[1]]);
 
-        thread::sleep(Duration::from_millis(DELAY_MS-(duration.as_millis() as u64).min(DELAY_MS)));
+        thread::sleep(Duration::from_millis(DELAY_MS));//-(duration.as_millis() as u64).min(DELAY_MS)));
     }
 
 }
