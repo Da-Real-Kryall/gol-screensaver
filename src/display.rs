@@ -36,7 +36,7 @@ pub(crate) fn print_board(
                     just_updated = true;
                 }
                 if colour != colours[state] {
-                    colour = colours[board[y][x]];
+                    colour = colours[state];
                     print_buffer.push_str(&format!("\x1b[1;38;5;{}m", colour));
                 }
                 print_buffer.push(CHAR_PALETTE[characters[state]]);
@@ -45,7 +45,7 @@ pub(crate) fn print_board(
             }
         }
     }
-    print!("{}", print_buffer);
+    print!("{}\x1b[0m", print_buffer);
 }
 
 //|| !(lifetype == 1

@@ -12,6 +12,7 @@ then, here are my checks for changing the lifetype:
 after these changes happen, the board will still be evaluated and updated.
 */
 use rand::Rng;
+use rand::seq::SliceRandom;
 use std::collections::VecDeque;
 use std::thread;
 use std::time::{Duration, Instant};
@@ -80,13 +81,27 @@ fn main() {
             1 | 2 => {
                 limited_life_timer = 150 + rng.gen_range(0, 250); //also reset limited_life_timer
 
-                new_type = rng.gen_range(0, LIFE_REF.len());
+                //new_type = rng.gen_range(0, LIFE_REF.len());
+                //check if the next board iteration will be empty with this type, and if so, change it.
+                //keep changing and checking until the next board will not be empty
+                //shuffled range of 0 to life_ref.len() - 1
+                let mut shuffled_range: Vec<usize> = (0..LIFE_REF.len()).collect();
+                shuffled_range.shuffle(&mut rng);
+
+                for lifetype in shuffled_range {
+                    let empty = update_board(&new_board, &lifetype, &false).iter().flatten().all(|&x| x != 1);
+                    if !empty {
+                        new_type = rng.gen_range(0, LIFE_REF.len());
+                        break;
+                    }
+                }
+
             }
             0 => {
                 limited_life_timer = 150 + rng.gen_range(0, 250); //also reset limited_life_timer
                 new_type = rng.gen_range(0, LIFE_REF.len());
-
-                //board is empty, refill after doing all the other stuff first
+                
+                //previous board is empty, refill after doing all the other stuff first
                 new_board = refill_board(&new_board, &type_history[0].clone()); //see if i can remove this clone later
                 colour_palette = [0; 6];
                 char_palette = [0; 6];
@@ -97,8 +112,9 @@ fn main() {
         new_board = update_board(
             &new_board,
             &type_history[0].clone(),
-            &(new_type != type_history[0] && new_type - 3 < 3),
+            &(new_type != type_history[0]),// && new_type - 3 < 3),
         ); //see if i can remove this clone later
+
 
         //update the history and limited life timer
         state_history.pop_back();
