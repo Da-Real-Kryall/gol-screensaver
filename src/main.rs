@@ -14,7 +14,7 @@ after these changes happen, the board will still be evaluated and updated.
 use rand::Rng;
 use std::collections::VecDeque;
 use std::thread;
-use std::time::Duration; //,Instant};
+use std::time::{Duration, Instant};
 
 pub(crate) mod consts;
 pub(crate) mod display;
@@ -57,10 +57,15 @@ fn main() {
         ]);
     let mut type_history: VecDeque<usize> = VecDeque::from(vec![0; HISTORY_LENGTH]);
     let mut limited_life_timer: usize = 0;
-    let mut colour_palette: [usize; 5] = [0; 5];
-    let mut old_colour_palette: [usize; 5] = [0; 5];
+
+    let mut colour_palette: [usize; 6] = [0; 6];
+    let mut old_colour_palette: [usize; 6] = [0; 6];
+
+    let mut char_palette: [usize; 6] = [0; 6];
+    let mut old_char_palette: [usize; 6] = [0; 6];
+
     loop {
-        //let current = Instant::now();
+        let current = Instant::now();
 
         //let new_board = board_history[0].clone();
         //check if board should be changed, and how it should be changed
@@ -83,7 +88,8 @@ fn main() {
 
                 //board is empty, refill after doing all the other stuff first
                 new_board = refill_board(&new_board, &type_history[0].clone()); //see if i can remove this clone later
-                colour_palette = [0; 5];
+                colour_palette = [0; 6];
+                char_palette = [0; 6];
             }
             _ => {}
         }
@@ -135,19 +141,51 @@ fn main() {
             }
         }
 
+        if char_palette != CHAR_REF[type_history[0]] {
+            //make the char palette closer to the current lifetype's palette, preferrably one character at a time
+            for i in 0..char_palette.len() {
+                if char_palette[i] == CHAR_REF[type_history[0]][i] {
+                    continue;
+                }
+                let mut current: (usize, usize) = (char_palette[i] % 5, char_palette[i] / 5);
+                let target: (usize, usize) = (
+                    CHAR_REF[type_history[0]][i] % 5,
+                    CHAR_REF[type_history[0]][i] / 5,
+                );
+                let dist_x: usize = current.0.abs_diff(target.0);
+                let dist_y: usize = current.1.abs_diff(target.1);
+                if dist_x > dist_y {
+                    if current.0 > target.0 {
+                        current.0 -= 1;
+                    } else {
+                        current.0 += 1;
+                    }
+                } else {
+                    if current.1 > target.1 {
+                        current.1 -= 1;
+                    } else {
+                        current.1 += 1;
+                    }
+                }
+                old_char_palette[i] = char_palette[i].clone();
+                char_palette[i] = current.0 + current.1 * 5;
+            }
+        }
+
         //print the board
 
-        //let duration = current.elapsed();
+        let duration = current.elapsed();
         print_board(
             &state_history[0],
             &state_history[1],
             colour_palette,
             old_colour_palette,
-            CHAR_PALETTE[type_history[0]],
-            CHAR_PALETTE[type_history[1]],
-            type_history[0],
+            char_palette,     //CHAR_PALETTE[type_history[0]],
+            old_char_palette, //CHAR_PALETTE[type_history[1]],
         );
 
-        thread::sleep(Duration::from_millis(DELAY_MS)); //-(duration.as_millis() as u64).min(DELAY_MS)));
+        thread::sleep(Duration::from_millis(
+            DELAY_MS - (duration.as_millis() as u64).min(DELAY_MS),
+        ));
     }
 }

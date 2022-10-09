@@ -1,13 +1,13 @@
+use crate::CHAR_PALETTE;
 use termion::{self, cursor::Goto};
 
 pub(crate) fn print_board(
     board: &Vec<Vec<usize>>,
     old_board: &Vec<Vec<usize>>,
-    colours: [usize; 5],
-    old_colours: [usize; 5],
-    characters: [char; 6],
-    old_characters: [char; 6],
-    lifetype: usize,
+    colours: [usize; 6],
+    old_colours: [usize; 6],
+    characters: [usize; 6],
+    old_characters: [usize; 6]
 ) {
     let mut print_buffer = String::new();
     print_buffer.push_str(termion::cursor::Goto(1, 1).to_string().as_str());
@@ -28,31 +28,18 @@ pub(crate) fn print_board(
                 old_state = old_state.min(1) + 4;
             }
             if old_state != state
-                || {
-                    (colours != old_colours || characters[state] != old_characters[state])
-                        && state != 0
-                }
-                || !(lifetype == 1
-                    || lifetype == 2
-                    || lifetype == 3
-                    || lifetype == 7
-                    || lifetype == 9)
+                || colours[state] != old_colours[state]
+                || characters[state] != old_characters[state]
             {
-                if just_updated == false
-                    && (lifetype == 1
-                        || lifetype == 2
-                        || lifetype == 3
-                        || lifetype == 7
-                        || lifetype == 9)
-                {
+                if just_updated == false {
                     print_buffer.push_str(&format!("{}", Goto((_x + 1) as u16, (_y + 1) as u16)));
                     just_updated = true;
                 }
-                if board[y][x] != 0 && colour != colours[state - 1] {
-                    colour = colours[board[y][x] - 1];
+                if colour != colours[state] {
+                    colour = colours[board[y][x]];
                     print_buffer.push_str(&format!("\x1b[1;38;5;{}m", colour));
                 }
-                print_buffer.push(characters[state]);
+                print_buffer.push(CHAR_PALETTE[characters[state]]);
             } else {
                 just_updated = false;
             }
@@ -60,3 +47,17 @@ pub(crate) fn print_board(
     }
     print!("{}", print_buffer);
 }
+
+//|| !(lifetype == 1
+//    || lifetype == 2
+//    || lifetype == 3
+//    || lifetype == 7
+//    || lifetype == 9)
+//{
+//if just_updated == false
+//    //&& (lifetype == 1
+//    //    || lifetype == 2
+//    //    || lifetype == 3
+//    //    || lifetype == 7
+//    //    || lifetype == 9)
+//{

@@ -1,4 +1,5 @@
 pub(crate) const HISTORY_LENGTH: usize = 20;
+
 pub(crate) const LIFE_REF: [[[usize; 9]; 6]; 12] = [
     // new state for a cell depending on various factors
     [
@@ -31,7 +32,7 @@ pub(crate) const LIFE_REF: [[[usize; 9]; 6]; 12] = [
     ],
     [
         //coagulations (changed a little)
-        [0, 0, 0, 1, 0, 0, 0, 1, 1], 
+        [0, 0, 0, 1, 0, 0, 0, 1, 1],
         [0, 0, 1, 1, 0, 1, 1, 1, 1], //[2, 3, ...
         [3, 3, 3, 3, 3, 3, 3, 3, 3], // done
         [4, 0, 5, 5, 5, 5, 5, 5, 5],
@@ -112,22 +113,24 @@ pub(crate) const LIFE_REF: [[[usize; 9]; 6]; 12] = [
     ],
 ];
 pub(crate) const INIT_CHANCE_REF: [usize; LIFE_REF.len()] = [8, 4, 5, 12, 2, 32, 7, 2, 6, 4, 2, 2];
+
 pub(crate) const DELAY_MS: u64 = 80;
-//all zeros
-pub(crate) const COLOUR_REF: [[usize; 5]; LIFE_REF.len()] = [
-    [15, 251, 245, 239, 233],  // game of life
-    [17, 18, 19, 20, 21],      // like star wars
-    [21, 20, 19, 18, 17],      // walled cities
-    [190, 148, 106, 64, 22],   // coagulations
-    [51, 45, 39, 33, 20],      // day night (might make the 0 a 17 again)
-    [156, 114, 72, 29, 23],    // maze
-    [220, 178, 142, 100, 58],  // 2x2
-    [84, 172, 82, 30, 18],     // amoeba with diff die time
-    [28, 40, 82, 118, 154],    // frogs
-    [160, 196, 166, 202, 220], // living on the edge
-    [196, 160, 124, 88, 52],   // high life
-    [207, 141, 139, 103, 60],  // move
+
+pub(crate) const COLOUR_REF: [[usize; 6]; LIFE_REF.len()] = [
+    [0, 15, 251, 245, 239, 233],  // game of life
+    [0, 17, 18, 19, 20, 21],      // like star wars
+    [0, 21, 20, 19, 18, 17],      // walled cities
+    [0, 190, 148, 106, 64, 22],   // coagulations
+    [0, 51, 45, 39, 33, 20],      // day night (might make the 0 a 17 again)
+    [0, 156, 114, 72, 29, 23],    // maze
+    [0, 220, 178, 142, 100, 58],  // 2x2
+    [0, 84, 172, 82, 30, 18],     // amoeba with diff die time
+    [0, 28, 40, 82, 118, 154],    // frogs
+    [0, 160, 196, 166, 202, 220], // living on the edge
+    [0, 196, 160, 124, 88, 52],   // high life
+    [0, 207, 141, 139, 103, 60],  // move
 ];
+
 pub(crate) const PALETTE: [[u32; 3]; 256] = [
     [0, 0, 0],
     [128, 0, 0],
@@ -388,10 +391,27 @@ pub(crate) const PALETTE: [[u32; 3]; 256] = [
 ];
 
 //i'll change each of these to an index on some other reference eventually
+//that time is now!
+//pub(crate) const CHAR_PALETTE: String = [
+//    " ·."
+//].concat().chars().collect();
+//not sure wether to make it a string or array of chars
+pub(crate) const CHAR_PALETTE: [char; 20] = [
+    ' ', '·', '+', 's', '3', '.', ',', '*', 'S', '4', '%', '&', '$', '#', '5', '@', 'O', '0', 'M',
+    '8',
+];
+//█
 
-//character for each state of each lifetype
-pub(crate) const CHAR_PALETTE: [[char; 6]; 12] = [
-    //[ 0 ,  1 ,  2 ,  3 ,  4 ,  5 ]
+/*
+     ·+s3
+    .,*S4
+    %&$#5
+    @O0M8
+*/
+
+//character index on reference for each state of each lifetype
+pub(crate) const CHAR_REF: [[usize; 6]; 12] = [
+    /*
     [' ', '#', '$', '%', '+', '·'], // game of life
     [' ', '#', '$', '%', '+', '·'], // like star wars
     [' ', '#', '$', '%', '+', '·'], // walled cities
@@ -404,4 +424,17 @@ pub(crate) const CHAR_PALETTE: [[char; 6]; 12] = [
     [' ', '#', '$', '%', '+', '·'], // living on the edge
     [' ', '&', '$', '%', '+', '·'], // high life
     [' ', 'M', '$', '%', '+', '·'], // move
+    */
+    [0, 13, 12, 10, 2, 1],  // game of life
+    [0, 13, 12, 10, 2, 1],  // like star wars
+    [0, 13, 12, 10, 2, 1],  // walled cities
+    [0, 17, 12, 10, 2, 1],  // edited coagulations
+    [0, 15, 12, 10, 2, 1],  // day night
+    [0, 17, 11, 7, 2, 1],   // maze
+    [0, 8, 3, 4, 9, 14],    // 2x2
+    [0, 16, 12, 10, 2, 1],  // edited amoeba
+    [0, 15, 12, 17, 16, 7], // frogs
+    [0, 13, 12, 10, 2, 1],  // living on the edge
+    [0, 11, 12, 10, 2, 1],  // high life
+    [0, 18, 12, 10, 2, 1],  // move
 ];
