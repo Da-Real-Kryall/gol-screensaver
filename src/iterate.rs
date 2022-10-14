@@ -1,4 +1,4 @@
-use crate::consts::{INIT_CHANCE_REF, LIFE_REF};
+use crate::consts::{HISTORY_LENGTH, HISTORY_MIN_CHECK, INIT_CHANCE_REF, LIFE_REF};
 use rand::Rng;
 use std::collections::VecDeque;
 
@@ -10,7 +10,7 @@ pub(crate) fn check_board_history(
     //, type_history: &VecDeque<usize>
     //check if board is empty
     let mut empty = true;
-    for row in &state_history[0] {
+    for row in &state_history[HISTORY_MIN_CHECK.min(HISTORY_LENGTH)] {
         for cell in row {
             if *cell != 0 {
                 empty = false;
@@ -20,7 +20,7 @@ pub(crate) fn check_board_history(
     if empty {
         return 0;
     }
-    //check if board is identical to one of the last 16 boards
+    //check if board is identical to one of the last HISTORY_MIN_CHECK.min(HISTORY_LENGTH)'th HISTORY_LENGTH boards
     let mut identical = false;
     for i in 1..state_history.len() {
         if state_history[0] == state_history[i] {

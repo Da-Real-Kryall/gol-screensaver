@@ -11,8 +11,8 @@ then, here are my checks for changing the lifetype:
 
 after these changes happen, the board will still be evaluated and updated.
 */
-use rand::Rng;
 use rand::seq::SliceRandom;
+use rand::Rng;
 use std::collections::VecDeque;
 use std::thread;
 use std::time::{Duration, Instant};
@@ -65,16 +65,14 @@ fn main() {
     let mut char_palette: [usize; 6] = [0; 6];
     let mut old_char_palette: [usize; 6] = [0; 6];
 
+    let mut current: Instant;
     loop {
-        let current = Instant::now();
+        current = Instant::now();
 
-        //let new_board = board_history[0].clone();
-        //check if board should be changed, and how it should be changed
         let mut new_board = state_history[0].clone();
-        let mut new_type = type_history[0];
+        let mut new_type: usize = type_history[0];
 
         match check_board_history(&state_history, &limited_life_timer) {
-            //&type_history,
             //0: board is empty, refill it and change lifetype
             //1: board is identical to one of the last 16 boards, change lifetype
             //2: board has been the same for a while, change lifetype
@@ -89,20 +87,24 @@ fn main() {
                 shuffled_range.shuffle(&mut rng);
 
                 for lifetype in shuffled_range {
-                    let empty = update_board(&new_board, &lifetype, &false).iter().flatten().all(|&x| x != 1);
+                    //new_type = lifetype;
+                    //break;
+                    let empty = update_board(&new_board, &lifetype, &false)
+                        .iter()
+                        .flatten()
+                        .all(|&x| x != 1);
                     if !empty {
                         new_type = rng.gen_range(0, LIFE_REF.len());
                         break;
                     }
                 }
-
             }
             0 => {
                 limited_life_timer = 150 + rng.gen_range(0, 250); //also reset limited_life_timer
                 new_type = rng.gen_range(0, LIFE_REF.len());
-                
+
                 //previous board is empty, refill after doing all the other stuff first
-                new_board = refill_board(&new_board, &type_history[0].clone()); //see if i can remove this clone later
+                new_board = refill_board(&new_board, &type_history[0]); //see if i can remove this clone later
                 colour_palette = [0; 6];
                 char_palette = [0; 6];
             }
@@ -111,10 +113,9 @@ fn main() {
         //update the board
         new_board = update_board(
             &new_board,
-            &type_history[0].clone(),
-            &(new_type != type_history[0]),// && new_type - 3 < 3),
+            &type_history[0],
+            &(new_type != type_history[0]), // && new_type - 3 < 3),
         ); //see if i can remove this clone later
-
 
         //update the history and limited life timer
         state_history.pop_back();
@@ -152,7 +153,7 @@ fn main() {
                         closest_dist = dist;
                     }
                 }
-                old_colour_palette[i] = colour_palette[i].clone();
+                old_colour_palette[i] = colour_palette[i];
                 colour_palette[i] = closest; //PALETTE.iter().position(|&x| x == colour).unwrap();
             }
         }
@@ -183,14 +184,13 @@ fn main() {
                         current.1 += 1;
                     }
                 }
-                old_char_palette[i] = char_palette[i].clone();
+                old_char_palette[i] = char_palette[i];
                 char_palette[i] = current.0 + current.1 * 5;
             }
         }
 
         //print the board
 
-        let duration = current.elapsed();
         print_board(
             &state_history[0],
             &state_history[1],
@@ -199,7 +199,11 @@ fn main() {
             char_palette,     //CHAR_PALETTE[type_history[0]],
             old_char_palette, //CHAR_PALETTE[type_history[1]],
         );
-
+        let duration = current.elapsed();
+        //print duration
+        //if duration > Duration::from_millis(1) {
+        //    println!("{}.{:03}", duration.as_secs(), duration.subsec_millis());
+        //}
         thread::sleep(Duration::from_millis(
             DELAY_MS - (duration.as_millis() as u64).min(DELAY_MS),
         ));

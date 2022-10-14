@@ -7,10 +7,11 @@ pub(crate) fn print_board(
     colours: [usize; 6],
     old_colours: [usize; 6],
     characters: [usize; 6],
-    old_characters: [usize; 6]
+    old_characters: [usize; 6],
 ) {
     let mut print_buffer = String::new();
     print_buffer.push_str(termion::cursor::Goto(1, 1).to_string().as_str());
+
     let mut colour: usize = 1000;
     let mut just_updated: bool = false;
     for _y in 0..board.len() + 2 {
@@ -35,8 +36,9 @@ pub(crate) fn print_board(
                     print_buffer.push_str(&format!("{}", Goto((_x + 1) as u16, (_y + 1) as u16)));
                     just_updated = true;
                 }
-                if colour != colours[state] {
-                    colour = colours[state];
+
+                if colour != colours[board[y][x]] {
+                    colour = colours[board[y][x]];
                     print_buffer.push_str(&format!("\x1b[1;38;5;{}m", colour));
                 }
                 print_buffer.push(CHAR_PALETTE[characters[state]]);

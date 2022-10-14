@@ -1,5 +1,6 @@
-pub(crate) const HISTORY_LENGTH: usize = 20;
-
+pub(crate) const HISTORY_LENGTH: usize = 10;
+pub(crate) const HISTORY_MIN_CHECK: usize = 1;
+pub(crate) const DELAY_MS: u64 = 80;
 pub(crate) const LIFE_REF: [[[usize; 9]; 6]; 12] = [
     // new state for a cell depending on various factors
     [
@@ -114,21 +115,19 @@ pub(crate) const LIFE_REF: [[[usize; 9]; 6]; 12] = [
 ];
 pub(crate) const INIT_CHANCE_REF: [usize; LIFE_REF.len()] = [8, 4, 5, 12, 2, 32, 7, 2, 6, 4, 2, 2];
 
-pub(crate) const DELAY_MS: u64 = 80;
-
 pub(crate) const COLOUR_REF: [[usize; 6]; LIFE_REF.len()] = [
-    [0, 15, 251, 245, 239, 233],  // game of life
-    [0, 17, 18, 19, 20, 21],      // like star wars
-    [0, 21, 20, 19, 18, 17],      // walled cities
-    [0, 190, 148, 106, 64, 22],   // coagulations
-    [0, 51, 45, 39, 33, 20],      // day night (might make the 0 a 17 again)
-    [0, 156, 114, 72, 29, 23],    // maze
-    [0, 220, 178, 142, 100, 58],  // 2x2
-    [0, 84, 172, 82, 30, 18],     // amoeba with diff die time
-    [0, 28, 40, 82, 118, 154],    // frogs
-    [0, 160, 196, 166, 202, 220], // living on the edge
-    [0, 196, 160, 124, 88, 52],   // high life
-    [0, 207, 141, 139, 103, 60],  // move
+    [15, 15, 251, 245, 239, 233],   // game of life
+    [17, 17, 18, 19, 20, 21],       // like star wars
+    [21, 21, 20, 19, 18, 17],       // walled cities
+    [190, 190, 148, 106, 64, 22],   // coagulations
+    [51, 51, 45, 39, 33, 20],       // day night (might make the 0 a 17 again)
+    [156, 156, 114, 72, 29, 23],    // maze
+    [220, 220, 178, 142, 100, 58],  // 2x2
+    [84, 84, 172, 82, 30, 18],      // amoeba with diff die time
+    [28, 28, 40, 82, 118, 154],     // frogs
+    [160, 160, 196, 166, 202, 220], // living on the edge
+    [196, 196, 160, 124, 88, 52],   // high life
+    [207, 207, 141, 139, 103, 60],  // move
 ];
 
 pub(crate) const PALETTE: [[u32; 3]; 256] = [
