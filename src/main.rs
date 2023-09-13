@@ -1,16 +1,4 @@
-/*
-i have a loop that continuously updates the board
-in the board history i keep track of cell states and lifetypes
-
-here are my checks for refilling the board:
-    if the board is empty
-
-then, here are my checks for changing the lifetype:
-    it has been a while since the last change
-    the board is identical to one of the last 16 boards, lifetype doesn't matter when comparing
-
-after these changes happen, the board will still be evaluated and updated.
-*/
+use minifb::{Window, WindowOptions}; //{Key,
 use rand::seq::SliceRandom;
 use rand::Rng;
 use std::collections::VecDeque;
@@ -24,89 +12,211 @@ use crate::consts::*;
 use crate::display::*;
 use crate::iterate::*;
 
-/* Functions to make:
-    check_board_history
-    refill_board
-    update_board
-    print_board
-*/
+fn generate_black_mask(black_mask: &mut Vec<bool>, buffer_width: usize, buffer_height: usize) {
+    //this is a mask that makes the drawn pixels rounded, slightly seperated squares.
+    //it's a vector of booleans
+    //true is black (i think)
+
+    let width_of_board_pixels = buffer_width / WIDTH;
+    let height_of_board_pixels = buffer_height / HEIGHT;
+
+    for board_y in 0..HEIGHT {
+        for board_x in 0..WIDTH {
+            let board_pixel_center_x = board_x * width_of_board_pixels + width_of_board_pixels / 2;
+            let board_pixel_center_y =
+                board_y * height_of_board_pixels + height_of_board_pixels / 2;
+            let radius = width_of_board_pixels as f64 * PERCENTAGE_SIZE_REDUCTION / 2.0;
+
+            let circle_center_distance_from_board_pixel_center =
+                radius * PERCENTAGE_ROUNDED_CORNERS;
+
+            //iterate over the pixels in the section of the screen for the current board pixel
+            for buffer_y in
+                (board_y * height_of_board_pixels)..((board_y + 1) * height_of_board_pixels)
+            {
+                for buffer_x in
+                    (board_x * width_of_board_pixels)..((board_x + 1) * width_of_board_pixels)
+                {
+                    let distance = (board_pixel_center_x as f64 - buffer_x as f64)
+                        .abs()
+                        .max((board_pixel_center_y as f64 - buffer_y as f64).abs());
+                    if distance > radius {
+                        black_mask[buffer_y * buffer_width + buffer_x] = true;
+                    } else {
+                        black_mask[buffer_y * buffer_width + buffer_x] = false;
+                    }
+                    //top left corner
+                    let tl_circle_center_x = board_pixel_center_x as f64
+                        - circle_center_distance_from_board_pixel_center;
+                    let tl_circle_center_y = board_pixel_center_y as f64
+                        - circle_center_distance_from_board_pixel_center;
+                    let tl_distance = ((tl_circle_center_x - buffer_x as f64).powi(2)
+                        + (tl_circle_center_y - buffer_y as f64).powi(2))
+                    .sqrt();
+                    //if the current pixel is outside the circle and to the top left of the circle, make the pixel black
+                    if tl_distance > (1.0 - PERCENTAGE_ROUNDED_CORNERS) * radius
+                        && buffer_x < tl_circle_center_x as usize
+                        && buffer_y < tl_circle_center_y as usize
+                    {
+                        black_mask[buffer_y * buffer_width + buffer_x] = true;
+                    }
+                    //top right corner
+                    let tr_circle_center_x = board_pixel_center_x as f64
+                        + circle_center_distance_from_board_pixel_center;
+                    let tr_circle_center_y = board_pixel_center_y as f64
+                        - circle_center_distance_from_board_pixel_center;
+                    let tr_distance = ((tr_circle_center_x - buffer_x as f64).powi(2)
+                        + (tr_circle_center_y - buffer_y as f64).powi(2))
+                    .sqrt();
+                    //if the current pixel is outside the circle and to the top right of the circle, make the pixel black
+                    if tr_distance > (1.0 - PERCENTAGE_ROUNDED_CORNERS) * radius
+                        && buffer_x > tr_circle_center_x as usize
+                        && buffer_y < tr_circle_center_y as usize
+                    {
+                        black_mask[buffer_y * buffer_width + buffer_x] = true;
+                    }
+                    //bottom left corner
+                    let bl_circle_center_x = board_pixel_center_x as f64
+                        - circle_center_distance_from_board_pixel_center;
+                    let bl_circle_center_y = board_pixel_center_y as f64
+                        + circle_center_distance_from_board_pixel_center;
+                    let bl_distance = ((bl_circle_center_x - buffer_x as f64).powi(2)
+                        + (bl_circle_center_y - buffer_y as f64).powi(2))
+                    .sqrt();
+                    //if the current pixel is outside the circle and to the bottom left of the circle, make the pixel black
+                    if bl_distance > (1.0 - PERCENTAGE_ROUNDED_CORNERS) * radius
+                        && buffer_x < bl_circle_center_x as usize
+                        && buffer_y > bl_circle_center_y as usize
+                    {
+                        black_mask[buffer_y * buffer_width + buffer_x] = true;
+                    }
+                    //bottom right corner
+                    let br_circle_center_x = board_pixel_center_x as f64
+                        + circle_center_distance_from_board_pixel_center;
+                    let br_circle_center_y = board_pixel_center_y as f64
+                        + circle_center_distance_from_board_pixel_center;
+                    let br_distance = ((br_circle_center_x - buffer_x as f64).powi(2)
+                        + (br_circle_center_y - buffer_y as f64).powi(2))
+                    .sqrt();
+                    //if the current pixel is outside the circle and to the bottom right of the circle, make the pixel black
+                    if br_distance > (1.0 - PERCENTAGE_ROUNDED_CORNERS) * radius
+                        && buffer_x > br_circle_center_x as usize
+                        && buffer_y > br_circle_center_y as usize
+                    {
+                        black_mask[buffer_y * buffer_width + buffer_x] = true;
+                    }
+                }
+            }
+        }
+    }
+}
 
 fn main() {
-    thread::sleep(Duration::from_millis(2000));
     let mut rng = rand::thread_rng();
-    let size: (u16, u16) = {
-        let mut s = termion::terminal_size().unwrap();
-        s.0 -= 2;
-        s.1 -= 2;
-        s
-    };
-    for _ in 0..size.0 {
-        print!("\n");
-    }
-
-    print!("{}", termion::cursor::Hide);
-
-    //show cursor (ansi sequence)
-    //print!("\x1b[?25h");
-
-    //wait 2 seconds
 
     let mut state_history: VecDeque<Vec<Vec<usize>>> =
         VecDeque::from(vec![
-            vec![vec![0; size.0 as usize]; size.1 as usize];
+            vec![vec![0; WIDTH as usize]; HEIGHT as usize];
             HISTORY_LENGTH
         ]);
     let mut type_history: VecDeque<usize> = VecDeque::from(vec![0; HISTORY_LENGTH]);
     let mut limited_life_timer: usize = 0;
 
-    let mut colour_palette: [usize; 6] = [0; 6];
-    let mut old_colour_palette: [usize; 6] = [0; 6];
+    let mut colour_palette: [u32; 6];
+    let mut old_colour_palette: [u32; 6];
 
-    let mut char_palette: [usize; 6] = [0; 6];
-    let mut old_char_palette: [usize; 6] = [0; 6];
+    let window_width = WIDTH * DETAIL_MULTIPLIER;
+    let window_height = HEIGHT * DETAIL_MULTIPLIER;
+    let buffer_width = window_width;
+    let buffer_height = window_height;
+
+    let options = WindowOptions {
+        resize: true,
+        ..WindowOptions::default()
+    };
+    let mut window = Window::new("Screensaver", window_width, window_height, options)
+        .unwrap_or_else(|e| {
+            panic!("{}", e);
+        });
+
+    let mut black_mask: Vec<bool> = vec![false; buffer_width * buffer_height];
+    generate_black_mask(&mut black_mask, buffer_width, buffer_height);
 
     let mut current: Instant;
-    loop {
-        current = Instant::now();
+    let mut buffer: Vec<u32> = vec![0; (buffer_width * buffer_height) as usize];
+    let mut prev_delay: u64 = DELAY_MS / 2;
+
+    //refill board
+    refill_board(&state_history[1], &5);
+
+    while window.is_open() {
+        // && !window.is_key_down(Key::Escape)
 
         let mut new_board = state_history[0].clone();
         let mut new_type: usize = type_history[0];
 
-        match check_board_history(&state_history, &limited_life_timer) {
+        match check_board_history(&state_history, &type_history, &limited_life_timer) {
             //0: board is empty, refill it and change lifetype
             //1: board is identical to one of the last 16 boards, change lifetype
             //2: board has been the same for a while, change lifetype
-            1 | 2 => {
-                limited_life_timer = 150 + rng.gen_range(0, 250); //also reset limited_life_timer
-
-                //new_type = rng.gen_range(0, LIFE_REF.len());
-                //check if the next board iteration will be empty with this type, and if so, change it.
-                //keep changing and checking until the next board will not be empty
-                //shuffled range of 0 to life_ref.len() - 1
-                let mut shuffled_range: Vec<usize> = (0..LIFE_REF.len()).collect();
-                shuffled_range.shuffle(&mut rng);
-
-                for lifetype in shuffled_range {
-                    //new_type = lifetype;
-                    //break;
-                    let empty = update_board(&new_board, &lifetype, &false)
-                        .iter()
-                        .flatten()
-                        .all(|&x| x != 1);
-                    if !empty {
-                        new_type = rng.gen_range(0, LIFE_REF.len());
-                        break;
-                    }
-                }
-            }
+            //3: board is GOING to be empty, change lifetype to one that will not be empty
             0 => {
-                limited_life_timer = 150 + rng.gen_range(0, 250); //also reset limited_life_timer
-                new_type = rng.gen_range(0, LIFE_REF.len());
+                new_type = rng.gen_range(0..LIFE_REF.len());
+                limited_life_timer =
+                    8 * LIFETIME_REF[new_type] + rng.gen_range(0..4) * LIFETIME_REF[new_type]; //reset limited_life_timer
 
                 //previous board is empty, refill after doing all the other stuff first
                 new_board = refill_board(&new_board, &type_history[0]); //see if i can remove this clone later
-                colour_palette = [0; 6];
-                char_palette = [0; 6];
+            }
+            1 | 2 => {
+                let mut shuffled_range = (0..LIFE_REF.len()).collect::<Vec<usize>>();
+                shuffled_range.shuffle(&mut rng);
+                let mut max_lifetime: usize = 0;
+                let mut max_lifetype: usize = shuffled_range[0];
+                for lifetype in shuffled_range {
+                    //see how many iterations before the board is empty
+                    let mut board = new_board.clone();
+                    for lifetime in 0..MAX_FUTURE_CHECK {
+                        board = update_board(&board, &lifetype, &(lifetype != type_history[0]));
+                        if !board.iter().flatten().all(|&x| x != 1) && lifetime > max_lifetime {
+                            max_lifetime = lifetime;
+                            max_lifetype = lifetype;
+                            break;
+                        }
+                    }
+                }
+                new_type = max_lifetype;
+
+                limited_life_timer =
+                    8 * LIFETIME_REF[new_type] + rng.gen_range(0..4) * LIFETIME_REF[new_type]; //reset limited_life_timer
+
+                //This is to prevent loops where the board doesn't change as no lifetypes will save it from death.
+                if &state_history[0] == &state_history[HISTORY_LENGTH - 1] {
+                    new_board = refill_board(&new_board, &type_history[0]);
+                }
+            }
+            3 => {
+                let mut shuffled_range = (0..LIFE_REF.len()).collect::<Vec<usize>>();
+                shuffled_range.shuffle(&mut rng);
+                let mut max_lifetime: usize = 0;
+                let mut max_lifetype: usize = shuffled_range[0];
+                for lifetype in shuffled_range {
+                    //see how many iterations before the board is empty
+                    let mut board = new_board.clone();
+                    for lifetime in 0..MAX_FUTURE_CHECK {
+                        board = update_board(&board, &lifetype, &(lifetype != type_history[0]));
+                        if !board.iter().flatten().all(|&x| x != 1) && lifetime > max_lifetime {
+                            max_lifetime = lifetime;
+                            max_lifetype = lifetype;
+                            break;
+                        }
+                    }
+                }
+                new_type = max_lifetype;
+
+                limited_life_timer =
+                    8 * LIFETIME_REF[new_type] + rng.gen_range(0..4) * LIFETIME_REF[new_type];
+                //reset limited_life_timer
             }
             _ => {}
         }
@@ -125,87 +235,42 @@ fn main() {
         type_history.push_front(new_type);
 
         limited_life_timer -= 1;
+        colour_palette = COLOUR_REF[type_history[0]];
+        old_colour_palette = COLOUR_REF[type_history[1]];
 
-        if colour_palette != COLOUR_REF[type_history[0]] {
-            //old_colour_palette = colour_palette.clone();
-            //make colour palette closer to the current lifetype's palette
-            for i in 0..colour_palette.len() {
-                let mut colour: [u32; 3] = PALETTE[colour_palette[i]];
-                let target: [u32; 3] = PALETTE[COLOUR_REF[type_history[0]][i]];
-                for j in 0..colour.len() {
-                    let tmp = colour[j] as i32 - target[j] as i32;
-                    if tmp > 0 {
-                        colour[j] -= 50.min(tmp as u32);
-                    } else if tmp < 0 {
-                        colour[j] += 50.min(-tmp as u32);
-                    }
-                }
-                //convert colour to closest palette colour
-                let mut closest: usize = 0;
-                let mut closest_dist: u32 = 1000;
-                for j in 0..PALETTE.len() {
-                    let mut dist: u32 = 0;
-                    for k in 0..colour.len() {
-                        dist += (colour[k] as i32 - PALETTE[j][k] as i32).abs() as u32;
-                    }
-                    if dist < closest_dist {
-                        closest = j;
-                        closest_dist = dist;
-                    }
-                }
-                old_colour_palette[i] = colour_palette[i];
-                colour_palette[i] = closest; //PALETTE.iter().position(|&x| x == colour).unwrap();
-            }
-        }
-
-        if char_palette != CHAR_REF[type_history[0]] {
-            //make the char palette closer to the current lifetype's palette, preferrably one character at a time
-            for i in 0..char_palette.len() {
-                if char_palette[i] == CHAR_REF[type_history[0]][i] {
-                    continue;
-                }
-                let mut current: (usize, usize) = (char_palette[i] % 5, char_palette[i] / 5);
-                let target: (usize, usize) = (
-                    CHAR_REF[type_history[0]][i] % 5,
-                    CHAR_REF[type_history[0]][i] / 5,
-                );
-                let dist_x: usize = current.0.abs_diff(target.0);
-                let dist_y: usize = current.1.abs_diff(target.1);
-                if dist_x > dist_y {
-                    if current.0 > target.0 {
-                        current.0 -= 1;
-                    } else {
-                        current.0 += 1;
-                    }
-                } else {
-                    if current.1 > target.1 {
-                        current.1 -= 1;
-                    } else {
-                        current.1 += 1;
-                    }
-                }
-                old_char_palette[i] = char_palette[i];
-                char_palette[i] = current.0 + current.1 * 5;
-            }
-        }
-
-        //print the board
-
-        print_board(
-            &state_history[0],
-            &state_history[1],
-            colour_palette,
-            old_colour_palette,
-            char_palette,     //CHAR_PALETTE[type_history[0]],
-            old_char_palette, //CHAR_PALETTE[type_history[1]],
-        );
-        let duration = current.elapsed();
-        //print duration
-        //if duration > Duration::from_millis(1) {
-        //    println!("{}.{:03}", duration.as_secs(), duration.subsec_millis());
+        //if window.is_key_down(Key::Space) {
+        //    limited_life_timer = 0;
         //}
-        thread::sleep(Duration::from_millis(
-            DELAY_MS - (duration.as_millis() as u64).min(DELAY_MS),
-        ));
+
+        for blend in 0..3 {
+            current = Instant::now();
+            print_board(
+                &state_history[0],
+                &state_history[1],
+                colour_palette,
+                old_colour_palette,
+                &mut buffer,
+                buffer_width,
+                buffer_height,
+                &black_mask,
+                match blend {
+                    0 => 0.0,
+                    1 => 0.33,
+                    2 => 0.67,
+                    _ => 0.0,
+                },
+            );
+            window
+                .update_with_buffer(&buffer, buffer_width, buffer_height)
+                .unwrap();
+            let duration = current.elapsed();
+            let delay = ((DELAY_MS / 2 - duration.as_millis() as u64)
+                .max(1)
+                .min(DELAY_MS / 2)
+                + prev_delay)
+                / 2;
+            thread::sleep(Duration::from_millis(delay));
+            prev_delay = delay;
+        }
     }
 }

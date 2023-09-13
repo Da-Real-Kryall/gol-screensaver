@@ -1,6 +1,6 @@
 # Screensaver Thingy
 
-This repo contains the source of a screensaver I have on my laptop; just the executable that visualises the pretty patterns, not the programs that launch it on inactivity; those are highly platform specific and frankly i have no idea how to implement them here.
+This repo contains the source of a screensaver I have on my laptop; just the executable that prints the pretty patterns, not the programs that launch it on inactivity; those are highly platform specific and frankly i have no idea how to implement them here.
 
 ---
 
@@ -18,7 +18,7 @@ This repo contains the source of a screensaver I have on my laptop; just the exe
     cargo run --release
     ```
 
-The compiled binary should be in the new `/target/release` directory as "golad_saver".
+The compiled binary should be in the new `/target/release` directory as "gol-screensaver".
 
 ---
 
@@ -29,4 +29,16 @@ I then did another rewrite in Rust for practice with the language, simultaneousl
 
 If you are curious as to how I have made this a screensaver on MacOS; I used a piece of software called "Sleepwatcher" to trigger executable files and bash scripts on certain inactivity related events.
 
-As of the newest rewrite, I have swapped from printing output on the terminal to making use of the rust library "minifb"; one of my first times actually using proper raster graphics haha.
+---
+
+## Here are some screenshots of it in action:
+![2by2](2by2.png)
+![coagulations](coagulations.png)
+![amoeba](amoeba.png)
+![cities](cities.png)
+![conway](conway.png)
+![daynight](daynight.png)
+![frog](frog.png)
+![lote](lote.png)
+![maze](maze.png)
+![starwars](starwars.png)

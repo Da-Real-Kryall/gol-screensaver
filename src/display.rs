@@ -1,65 +1,52 @@
-use crate::CHAR_PALETTE;
-use termion::{self, cursor::Goto};
+use crate::{HEIGHT, WIDTH};
+
+fn from_u8_rgb(r: u8, g: u8, b: u8) -> u32 {
+    let (r, g, b) = (r as u32, g as u32, b as u32);
+    (r << 16) | (g << 8) | b
+}
+
+fn u32_to_u8_rgb(colour: u32) -> (u8, u8, u8) {
+    let r = (colour >> 16) as u8;
+    let g = (colour >> 8) as u8;
+    let b = colour as u8;
+    (r, g, b)
+}
 
 pub(crate) fn print_board(
     board: &Vec<Vec<usize>>,
     old_board: &Vec<Vec<usize>>,
-    colours: [usize; 6],
-    old_colours: [usize; 6],
-    characters: [usize; 6],
-    old_characters: [usize; 6],
+    colours: [u32; 6],
+    old_colours: [u32; 6],
+    buffer: &mut Vec<u32>,
+    buffer_width: usize,
+    buffer_height: usize,
+    black_mask: &Vec<bool>,
+    blend: f32, //0.0 to 1.0, determines how much of the old colour to keep
 ) {
-    let mut print_buffer = String::new();
-    print_buffer.push_str(termion::cursor::Goto(1, 1).to_string().as_str());
+    //make the blended colour palette of palettes
+    let mut blended_colours = [[0; 6]; 6];
+    for i in 0..6 {
+        for j in 0..6 {
+            let new_colour = u32_to_u8_rgb(colours[i]);
+            let old_colour = u32_to_u8_rgb(old_colours[j]);
+            blended_colours[i][j] = from_u8_rgb(
+                (new_colour.0 as f32 * blend + old_colour.0 as f32 * (1.0 - blend)) as u8,
+                (new_colour.1 as f32 * blend + old_colour.1 as f32 * (1.0 - blend)) as u8,
+                (new_colour.2 as f32 * blend + old_colour.2 as f32 * (1.0 - blend)) as u8,
+            );
+        }
+    }
+    for buffer_y in 0..buffer_height {
+        for buffer_x in 0..buffer_width {
+            let board_x = buffer_x * WIDTH / buffer_width;
+            let board_y = buffer_y * HEIGHT / buffer_height;
 
-    let mut colour: usize = 1000;
-    let mut just_updated: bool = false;
-    for _y in 0..board.len() + 2 {
-        for _x in 0..board[0].len() + 2 {
-            let x = (_x + board[0].len() - 1) % board[0].len();
-            let y = (_y + board.len() - 1) % board.len();
-            let mut state = board[y][x];
-            let mut old_state = old_board[y][x];
-
-            if (_x.abs_diff(board[0].len() + 1) % (board[0].len() + 1) < 1
-                || _y.abs_diff(board.len() + 1) % (board.len() + 1) < 1)
-                && state != 0
-            {
-                state = state.min(1) + 4;
-                old_state = old_state.min(1) + 4;
-            }
-            if old_state != state
-                || colours[state] != old_colours[state]
-                || characters[state] != old_characters[state]
-            {
-                if just_updated == false {
-                    print_buffer.push_str(&format!("{}", Goto((_x + 1) as u16, (_y + 1) as u16)));
-                    just_updated = true;
-                }
-
-                if colour != colours[board[y][x]] {
-                    colour = colours[board[y][x]];
-                    print_buffer.push_str(&format!("\x1b[1;38;5;{}m", colour));
-                }
-                print_buffer.push(CHAR_PALETTE[characters[state]]);
+            if black_mask[buffer_y * buffer_width + buffer_x] {
+                buffer[buffer_y * buffer_width + buffer_x] = 0x000000;
             } else {
-                just_updated = false;
+                let colour = blended_colours[board[board_y][board_x]][old_board[board_y][board_x]];
+                buffer[buffer_y * buffer_width + buffer_x] = colour as u32;
             }
         }
     }
-    print!("{}\x1b[0m", print_buffer);
 }
-
-//|| !(lifetype == 1
-//    || lifetype == 2
-//    || lifetype == 3
-//    || lifetype == 7
-//    || lifetype == 9)
-//{
-//if just_updated == false
-//    //&& (lifetype == 1
-//    //    || lifetype == 2
-//    //    || lifetype == 3
-//    //    || lifetype == 7
-//    //    || lifetype == 9)
-//{
